@@ -1,0 +1,10 @@
+<h3>Share File: {{ file.filename }}</h3>
+<form method="POST">
+  <label>Select Doctor:</label>
+  <select name="doctor_id">
+    {% for doctor in doctors %}
+      <option value="{{ doctor.id }}">{{ doctor.name }} ({{ doctor.email }})</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Share</button>
+</form>

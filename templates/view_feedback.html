@@ -1,0 +1,7 @@
+<h2>Your Feedback from Doctor</h2>
+{% for fb in feedbacks %}
+    <div>
+        <p><strong>{{ fb.timestamp.strftime('%Y-%m-%d %H:%M') }}</strong></p>
+        <p>{{ fb.feedback }}</p>
+    </div>
+{% endfor %}

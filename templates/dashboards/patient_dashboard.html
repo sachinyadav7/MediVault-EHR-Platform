@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Analytics - MediVault EHR</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        .patient-analytics {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .health-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 40px;
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .health-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .health-header h1 {
+            margin: 0 0 12px 0;
+            font-size: 32px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .health-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 18px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .health-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .health-metric {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            position: relative;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .health-metric:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+        
+        .metric-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .metric-icon.files {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .metric-icon.shared {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+        
+        .metric-icon.appointments {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+        }
+        
+        .metric-icon.storage {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: white;
+        }
+        
+        .metric-icon.prescriptions {
+            background: linear-gradient(135deg, #fa709a, #fee140);
+            color: white;
+        }
+        
+        .metric-title {
+            color: #374151;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 0 8px 0;
+        }
+        
+        .metric-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: #111827;
+            margin: 0 0 8px 0;
+            line-height: 1;
+        }
+        
+        .metric-change {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin: 0;
+        }
+        
+        .metric-change.positive {
+            color: #10b981;
+        }
+        
+        .metric-change.neutral {
+            color: #6b7280;
+        }
+        
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .chart-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+            margin: 0;
+        }
+        
+        .chart-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 4px 0 0 0;
+        }
+        
+        .time-filter {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 10px;
+            padding: 4px;
+        }
+        
+        .time-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #6b7280;
+        }
+        
+        .time-btn.active {
+            background: white;
+            color: #111827;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            transition: stroke-dashoffset 0.35s;
+            transform-origin: 50% 50%;
+        }
+        
+        .health-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .summary-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .summary-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .summary-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .summary-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+            margin: 0;
+        }
+        
+        .file-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .file-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin: 0 0 4px 0;
+        }
+        
+        .file-info p {
+            font-size: 12px;
+            color: #6b7280;
+            margin: 0;
+        }
+        
+        .file-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-lab {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+        }
+        
+        .badge-prescription {
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+        }
+        
+        .badge-scan {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+        
+        .badge-other {
+            background: rgba(107, 114, 128, 0.1);
+            color: #374151;
+        }
+        
+        .doctor-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .doctor-item:hover {
+            background: #f3f4f6;
+            transform: translateX(4px);
+        }
+        
+        .doctor-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin: 0 0 4px 0;
+        }
+        
+        .doctor-info p {
+            font-size: 12px;
+            color: #6b7280;
+            margin: 0;
+        }
+        
+        .access-count {
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+        
+        .empty-state p {
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .analytics-grid,
+            .health-summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .health-overview {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+            
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="patient-analytics">
+        <!-- Health Header -->
+        <div class="health-header">
+            <h1>🏥 Your Health Analytics</h1>
+            <p>Track your medical records, appointments, and health journey</p>
+        </div>
+
+        <!-- Health Overview Metrics -->
+        <div class="health-overview">
+            <div class="health-metric">
+                <div class="metric-icon files">📄</div>
+                <h3 class="metric-title">Medical Files</h3>
+                <p class="metric-value">{{ metrics.total_files if metrics else 0 }}</p>
+                <p class="metric-change neutral">{{ metrics.storage_mb if metrics else 0 }} MB used</p>
+            </div>
+            
+            <div class="health-metric">
+                <div class="metric-icon shared">🤝</div>
+                <h3 class="metric-title">Shared Files</h3>
+                <p class="metric-value">{{ metrics.shared_files if metrics else 0 }}</p>
+                <p class="metric-change positive">
+                    {% if metrics and metrics.total_files > 0 %}
+                        {{ "%.0f"|format((metrics.shared_files / metrics.total_files * 100)) }}% of your files
+                    {% else %}
+                        0% of your files
+                    {% endif %}
+                </p>
+            </div>
+            
+            <div class="health-metric">
+                <div class="metric-icon appointments">📅</div>
+                <h3 class="metric-title">Appointments</h3>
+                <p class="metric-value">{{ metrics.total_appointments if metrics else 0 }}</p>
+                <p class="metric-change positive">{{ metrics.upcoming_appointments if metrics else 0 }} upcoming</p>
+            </div>
+            
+            <div class="health-metric">
+                <div class="metric-icon prescriptions">💊</div>
+                <h3 class="metric-title">Active Prescriptions</h3>
+                <p class="metric-value">{{ metrics.active_prescriptions if metrics else 0 }}</p>
+                <p class="metric-change neutral">Current medications</p>
+            </div>
+        </div>
+
+        <!-- Analytics Charts -->
+        <div class="analytics-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <h3 class="chart-title">File Upload Activity</h3>
+                        <p class="chart-subtitle">Your medical record uploads over time</p>
+                    </div>
+                    <div class="time-filter">
+                        <button class="time-btn" onclick="updateUploadChart(30)">30D</button>
+                        <button class="time-btn active" onclick="updateUploadChart(90)">90D</button>
+                        <button class="time-btn" onclick="updateUploadChart(365)">1Y</button>
+                    </div>
+                </div>
+                <canvas id="uploadTrendsChart" style="max-height: 300px;"></canvas>
+            </div>
+            
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <h3 class="chart-title">File Categories</h3>
+                        <p class="chart-subtitle">Distribution of your medical files</p>
+                    </div>
+                </div>
+                <canvas id="fileCategoriesChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+
+        <!-- Health Summary -->
+        <div class="health-summary">
+            <div class="summary-card">
+                <div class="summary-header">
+                    <div class="summary-icon">📋</div>
+                    <h3 class="summary-title">Recent Files</h3>
+                </div>
+                
+                <div class="file-list">
+                    {% if metrics and metrics.recent_files %}
+                        {% for file in metrics.recent_files %}
+                        <div class="file-item">
+                            <div class="file-info">
+                                <h4>{{ file.filename }}</h4>
+                                <p>{{ file.upload_date }} • {{ file.size_mb }} MB</p>
+                            </div>
+                            <span class="file-badge badge-{{ file.category.replace('_', '-') }}">
+                                {{ file.category.replace('_', ' ').title() }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📂</div>
+                            <h3>No files uploaded yet</h3>
+                            <p>Start by uploading your medical records</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-header">
+                    <div class="summary-icon">👨‍⚕️</div>
+                    <h3 class="summary-title">Doctors with Access</h3>
+                </div>
+                
+                <div class="file-list">
+                    {% if metrics and metrics.doctors_with_access %}
+                        {% for doctor in metrics.doctors_with_access %}
+                        <div class="doctor-item">
+                            <div class="doctor-info">
+                                <h4>{{ doctor.name }}</h4>
+                                <p>{{ doctor.specialization }}</p>
+                            </div>
+                            <span class="access-count">{{ doctor.file_count }} files</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👥</div>
+                            <h3>No shared access yet</h3>
+                            <p>Share files with your doctors to enable collaboration</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uploadChart, categoriesChart;
+        let currentUploadPeriod = 90;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+        });
+
+        function initializeCharts() {
+            loadUploadTrends(currentUploadPeriod);
+            loadFileCategories();
+        }
+
+        function loadUploadTrends(days) {
+            fetch(`/analytics/patient/api/file-upload-trends?days=${days}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (uploadChart) {
+                        uploadChart.destroy();
+                    }
+
+                    const ctx = document.getElementById('uploadTrendsChart').getContext('2d');
+                    uploadChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Files Uploaded',
+                                data: data.data,
+                                backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                                borderColor: 'rgba(102, 126, 234, 1)',
+                                borderWidth: 2,
+                                borderRadius: 8,
+                                borderSkipped: false,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1
+                                    },
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading upload trends:', error);
+                    // Show fallback empty chart
+                    showEmptyChart('uploadTrendsChart');
+                });
+        }
+
+        function loadFileCategories() {
+            // Create chart data from metrics - handle case where metrics might not exist
+            const categories = {{ (metrics.file_categories if metrics else []) | tojson }};
+            
+            if (categories.length === 0) {
+                showEmptyChart('fileCategoriesChart');
+                return;
+            }
+
+            const labels = categories.map(cat => {
+                const labelMap = {
+                    'lab_report': 'Lab Reports',
+                    'prescription': 'Prescriptions',
+                    'scan': 'Medical Scans',
+                    'consultation': 'Consultations',
+                    'insurance': 'Insurance',
+                    'other': 'Other'
+                };
+                return labelMap[cat.category] || cat.category;
+            });
+
+            const data = categories.map(cat => cat.count);
+            const colors = [
+                '#667eea', '#f093fb', '#4facfe', '#43e97b', '#fa709a', '#ffeaa7'
+            ];
+
+            const ctx = document.getElementById('fileCategoriesChart').getContext('2d');
+            categoriesChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, data.length),
+                        borderWidth: 0,
+                        hoverBorderWidth: 4,
+                        hoverBorderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                fontColor: '#374151'
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        function showEmptyChart(canvasId) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['No Data'],
+                    datasets: [{
+                        data: [1],
+                        backgroundColor: ['#f3f4f6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        function updateUploadChart(days) {
+            // Update active button
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update chart
+            currentUploadPeriod = days;
+            loadUploadTrends(days);
+        }
+
+        // Health insights and tips
+        function showHealthInsights() {
+            const insights = [
+                "💡 You've been consistent with uploading your medical records!",
+                "📊 Consider sharing more files with your primary care physician.",
+                "🎯 Regular health checkups help maintain better records.",
+                "📅 Don't forget about your upcoming appointments!"
+            ];
+            
+            const randomInsight = insights[Math.floor(Math.random() * insights.length)];
+            
+            // Create a simple notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+                z-index: 1000;
+                max-width: 300px;
+                font-size: 14px;
+                font-weight: 500;
+            `;
+            notification.textContent = randomInsight;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Show health insights on page load
+        setTimeout(showHealthInsights, 3000);
+    </script>
+</body>
+</html>

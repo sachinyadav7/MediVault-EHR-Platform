@@ -1,0 +1,84 @@
+# Flask Core
+Flask==2.3.3
+Flask-Login==0.6.3
+Flask-SQLAlchemy==3.0.5
+Flask-Migrate==4.0.5
+Flask-WTF==1.1.1
+Flask-Mail==0.9.1
+Flask-Caching==2.1.0
+Flask-Limiter==3.5.0
+
+# Database
+SQLAlchemy==2.0.23
+Alembic==1.12.1
+
+# Security & Encryption
+cryptography==41.0.7
+bcrypt==4.0.1
+PyJWT==2.8.0
+itsdangerous==2.1.2
+
+# Web & HTTP
+Werkzeug==2.3.7
+Jinja2==3.1.2
+MarkupSafe==2.1.3
+click==8.1.7
+
+# File Handling
+Pillow==10.1.0
+python-magic==0.4.27
+
+# Date & Time
+python-dateutil==2.8.2
+
+# Environment & Configuration
+python-dotenv==1.0.0
+
+# Validation & Forms
+WTForms==3.1.0
+email-validator==2.1.0
+
+# Development & Testing
+pytest==7.4.3
+pytest-flask==1.3.0
+pytest-cov==4.1.0
+factory-boy==3.3.0
+
+# Production Server
+gunicorn==21.2.0
+gevent==23.9.1
+
+# Database Connectors
+psycopg2-binary==2.9.9  # PostgreSQL
+PyMySQL==1.1.0          # MySQL
+
+# Utilities
+requests==2.31.0
+urllib3==2.1.0
+certifi==2023.11.17
+charset-normalizer==3.3.2
+idna==3.6
+
+# Monitoring & Logging
+sentry-sdk[flask]==1.38.0
+
+# API & Serialization
+marshmallow==3.20.1
+apispec==6.3.0
+
+# Background Tasks (Optional)
+celery==5.3.4
+redis==5.0.1
+
+# File Storage (Optional)
+boto3==1.34.0           # AWS S3
+azure-storage-blob==12.19.0  # Azure Blob Storage
+
+# Development Tools
+black==23.11.0
+flake8==6.1.0
+isort==5.12.0
+
+# Documentation
+Sphinx==7.2.6
+sphinx-rtd-theme==1.3.0

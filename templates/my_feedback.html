@@ -1,0 +1,6 @@
+<h2>My Feedback</h2>
+<ul>
+  {% for fb in feedbacks %}
+    <li><b>{{ fb.timestamp.strftime('%Y-%m-%d') }} from {{ fb.doctor.name }}:</b><br>{{ fb.feedback_text }}</li>
+  {% endfor %}
+</ul>

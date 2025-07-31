@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Audit Logs - MediVault</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Same styling as you provided */
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>📜 Audit Logs</h2>
+    {% if logs.items %}
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Username</th>
+                <th>Action</th>
+                <th>File</th>
+                <th>IP Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs.items %}
+            <tr>
+                <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ log.user.username }}</td>
+                <td>{{ log.action }}</td>
+                <td>{{ log.filename }}</td>
+                <td>{{ log.ip_address or 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <!-- Pagination -->
+    <div style="text-align:center; margin-top:20px;">
+        {% if logs.has_prev %}
+            <a href="{{ url_for('audit_logs', page=logs.prev_num) }}">⬅️ Prev</a>
+        {% endif %}
+        Page {{ logs.page }} of {{ logs.pages }}
+        {% if logs.has_next %}
+            <a href="{{ url_for('audit_logs', page=logs.next_num) }}">Next ➡️</a>
+        {% endif %}
+    </div>
+
+    {% else %}
+    <p>No logs found.</p>
+    {% endif %}
+    
+    <a href="{{ url_for('download_audit_logs') }}" class="btn btn-success mb-3">⬇️ Download as CSV</a>
+    <a class="back-link" href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+</div>
+</body>
+</html>

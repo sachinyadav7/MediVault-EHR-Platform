@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if selected_role %}{{ selected_role.title() }} {% endif %}Registration | MediVault</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="auth-body">
+
+    <!-- Header -->
+    <header class="auth-header">
+        <div class="container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}">
+                    <i class="fas fa-heartbeat"></i> MediVault
+                </a>
+            </div>
+            <nav>
+                <a href="{{ url_for('home') }}" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> Back to Home
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="auth-main">
+        <div class="auth-container">
+            <div class="auth-card">
+                <!-- Role Selection Header -->
+                <div class="auth-header-section">
+                    <div class="role-selector">
+                        <a href="{{ url_for('register', role='patient') }}" 
+                           class="role-tab {% if selected_role == 'patient' %}active{% endif %}">
+                            <i class="fas fa-user"></i>
+                            <span>Patient</span>
+                        </a>
+                        <a href="{{ url_for('register', role='doctor') }}" 
+                           class="role-tab {% if selected_role == 'doctor' %}active{% endif %}">
+                            <i class="fas fa-user-md"></i>
+                            <span>Doctor</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Registration Form -->
+                <div class="auth-form-section">
+                    <div class="auth-title">
+                        <h2>
+                            {% if selected_role == 'patient' %}
+                                <i class="fas fa-user"></i> Patient Registration
+                            {% elif selected_role == 'doctor' %}
+                                <i class="fas fa-user-md"></i> Doctor Registration
+                            {% else %}
+                                <i class="fas fa-user-plus"></i> Select Your Role
+                            {% endif %}
+                        </h2>
+                        <p class="auth-subtitle">
+                            {% if selected_role == 'patient' %}
+                                Create your secure health record account
+                            {% elif selected_role == 'doctor' %}
+                                Join our network of healthcare professionals
+                            {% else %}
+                                Please select your role above to continue
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="flash-messages">
+                                {% for category, message in messages %}
+                                    <div class="flash-message flash-{{ category }}">
+                                        <i class="fas fa-{% if category == 'error' %}exclamation-circle{% elif category == 'success' %}check-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+
+                    {% if selected_role %}
+                    <form method="POST" action="{{ url_for('register_post') }}" class="auth-form" id="registrationForm">
+                        <input type="hidden" name="role" value="{{ selected_role }}">
+                        
+                        <!-- Basic Information -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-user"></i> Personal Information</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="first_name">
+                                        <i class="fas fa-user"></i> First Name *
+                                    </label>
+                                    <input type="text" id="first_name" name="first_name" required 
+                                           placeholder="Enter your first name"
+                                           class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="last_name">
+                                        <i class="fas fa-user"></i> Last Name *
+                                    </label>
+                                    <input type="text" id="last_name" name="last_name" required 
+                                           placeholder="Enter your last name"
+                                           class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">
+                                    <i class="fas fa-envelope"></i> Email Address *
+                                </label>
+                                <input type="email" id="email" name="email" required 
+                                       placeholder="Enter your email address"
+                                       class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone">
+                                    <i class="fas fa-phone"></i> Phone Number *
+                                </label>
+                                <input type="tel" id="phone" name="phone" required 
+                                       placeholder="Enter your phone number"
+                                       class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- Password Section -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-lock"></i> Security</h3>
+                            
+                            <div class="form-group">
+                                <label for="password">
+                                    <i class="fas fa-lock"></i> Password *
+                                </label>
+                                <div class="password-input">
+                                    <input type="password" id="password" name="password" required 
+                                           placeholder="Create a strong password"
+                                           class="form-control" onkeyup="checkPasswordStrength()">
+                                    <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                                        <i class="fas fa-eye" id="password-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="password-strength" id="passwordStrength"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirm_password">
+                                    <i class="fas fa-lock"></i> Confirm Password *
+                                </label>
+                                <div class="password-input">
+                                    <input type="password" id="confirm_password" name="confirm_password" required 
+                                           placeholder="Confirm your password"
+                                           class="form-control" onkeyup="checkPasswordMatch()">
+                                    <button type="button" class="password-toggle" onclick="togglePassword('confirm_password')">
+                                        <i class="fas fa-eye" id="confirm-password-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="password-match" id="passwordMatch"></div>
+                            </div>
+                        </div>
+
+                        {% if selected_role == 'doctor' %}
+                        <!-- Doctor-specific fields -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-stethoscope"></i> Professional Information</h3>
+                            
+                            <div class="form-group">
+                                <label for="medical_license">
+                                    <i class="fas fa-id-card"></i> Medical License Number *
+                                </label>
+                                <input type="text" id="medical_license" name="medical_license" required 
+                                       placeholder="Enter your medical license number"
+                                       class="form-control">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="specialization">
+                                        <i class="fas fa-heartbeat"></i> Specialization *
+                                    </label>
+                                    <select id="specialization" name="specialization" required class="form-control">
+                                        <option value="">Select Specialization</option>
+                                        <option value="General Medicine">General Medicine</option>
+                                        <option value="Cardiology">Cardiology</option>
+                                        <option value="Dermatology">Dermatology</option>
+                                        <option value="Neurology">Neurology</option>
+                                        <option value="Orthopedics">Orthopedics</option>
+                                        <option value="Pediatrics">Pediatrics</option>
+                                        <option value="Psychiatry">Psychiatry</option>
+                                        <option value="Radiology">Radiology</option>
+                                        <option value="Surgery">Surgery</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="experience_years">
+                                        <i class="fas fa-calendar"></i> Years of Experience
+                                    </label>
+                                    <input type="number" id="experience_years" name="experience_years" 
+                                           placeholder="0" min="0" max="50"
+                                           class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="qualification">
+                                    <i class="fas fa-graduation-cap"></i> Qualification *
+                                </label>
+                                <input type="text" id="qualification" name="qualification" required 
+                                       placeholder="e.g., MBBS, MD, etc."
+                                       class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="hospital_name">
+                                    <i class="fas fa-hospital"></i> Hospital/Clinic Name
+                                </label>
+                                <input type="text" id="hospital_name" name="hospital_name" 
+                                       placeholder="Enter your workplace"
+                                       class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="bio">
+                                    <i class="fas fa-info-circle"></i> Professional Bio
+                                </label>
+                                <textarea id="bio" name="bio" rows="3" 
+                                          placeholder="Brief description of your practice and expertise"
+                                          class="form-control"></textarea>
+                            </div>
+                        </div>
+                        {% elif selected_role == 'patient' %}
+                        <!-- Patient-specific fields -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-heart"></i> Health Information (Optional)</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="blood_group">
+                                        <i class="fas fa-tint"></i> Blood Group
+                                    </label>
+                                    <select id="blood_group" name="blood_group" class="form-control">
+                                        <option value="">Select Blood Group</option>
+                                        <option value="A+">A+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="AB+">AB+</option>
+                                        <option value="AB-">AB-</option>
+                                        <option value="O+">O+</option>
+                                        <option value="O-">O-</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="emergency_contact_name">
+                                    <i class="fas fa-user-friends"></i> Emergency Contact Name
+                                </label>
+                                <input type="text" id="emergency_contact_name" name="emergency_contact_name" 
+                                       placeholder="Full name of emergency contact"
+                                       class="form-control">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="emergency_contact_phone">
+                                        <i class="fas fa-phone"></i> Emergency Contact Phone
+                                    </label>
+                                    <input type="tel" id="emergency_contact_phone" name="emergency_contact_phone" 
+                                           placeholder="Emergency contact number"
+                                           class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="emergency_contact_relation">
+                                        <i class="fas fa-heart"></i> Relationship
+                                    </label>
+                                    <select id="emergency_contact_relation" name="emergency_contact_relation" class="form-control">
+                                        <option value="">Select Relationship</option>
+                                        <option value="Spouse">Spouse</option>
+                                        <option value="Parent">Parent</option>
+                                        <option value="Child">Child</option>
+                                        <option value="Sibling">Sibling</option>
+                                        <option value="Friend">Friend</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Terms and Conditions -->
+                        <div class="form-section">
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="terms_accepted" required>
+                                    <span class="checkmark"></span>
+                                    I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
+                                </label>
+                            </div>
+
+                            {% if selected_role == 'doctor' %}
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="hipaa_accepted" required>
+                                    <span class="checkmark"></span>
+                                    I acknowledge that I will comply with HIPAA regulations and maintain patient confidentiality
+                                </label>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="fas fa-user-plus"></i> 
+                            Create {{ selected_role.title() }} Account
+                        </button>
+                    </form>
+
+                    <div class="auth-divider">
+                        <span>Already have an account?</span>
+                    </div>
+
+                    <a href="{{ url_for('login', role=selected_role) }}" class="btn btn-secondary btn-full">
+                        <i class="fas fa-sign-in-alt"></i> 
+                        Sign In as {{ selected_role.title() }}
+                    </a>
+
+                    {% else %}
+                    <div class="role-selection-prompt">
+                        <i class="fas fa-arrow-up"></i>
+                        <p>Please select your role above to access the registration form</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Side Panel with Role Information -->
+            <div class="auth-side-panel">
+                {% if selected_role == 'patient' %}
+                <div class="side-panel-content">
+                    <h3><i class="fas fa-user"></i> Patient Benefits</h3>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-shield-alt"></i> Your data is encrypted with military-grade security</li>
+                        <li><i class="fas fa-cloud"></i> Access your records from anywhere, anytime</li>
+                        <li><i class="fas fa-user-md"></i> Connect with verified healthcare professionals</li>
+                        <li><i class="fas fa-calendar"></i> Easy appointment scheduling and reminders</li>
+                        <li><i class="fas fa-prescription"></i> Digital prescription management</li>
+                    </ul>
+                    
+                    <div class="verification-notice">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Instant account activation after registration</span>
+                    </div>
+                </div>
+                {% elif selected_role == 'doctor' %}
+                <div class="side-panel-content">
+                    <h3><i class="fas fa-user-md"></i> Doctor Benefits</h3>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-users"></i> Comprehensive patient management system</li>
+                        <li><i class="fas fa-video"></i> Secure telemedicine platform</li>
+                        <li><i class="fas fa-chart-bar"></i> Patient analytics and health tracking</li>
+                        <li><i class="fas fa-prescription"></i> Digital prescription writing tools</li>
+                        <li><i class="fas fa-shield-check"></i> HIPAA-compliant communication</li>
+                    </ul>
+                    
+                    <div class="verification-notice warning">
+                        <i class="fas fa-clock"></i>
+                        <span>Account requires verification by our medical team (24-48 hours)</span>
+                    </div>
+                </div>
+                {% else %}
+                <div class="side-panel-content">
+                    <h3><i class="fas fa-heartbeat"></i> Join MediVault</h3>
+                    <p>Choose your role to get started with secure, encrypted healthcare management.</p>
+                    
+                    <div class="role-comparison">
+                        <div class="role-option">
+                            <h4><i class="fas fa-user"></i> Patients</h4>
+                            <p>Secure health records, easy doctor consultations, appointment management</p>
+                        </div>
+                        <div class="role-option">
+                            <h4><i class="fas fa-user-md"></i> Doctors</h4>
+                            <p>Patient management, telemedicine, digital prescriptions, analytics</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Enhanced Styles -->
+    <style>
+        /* Include all styles from login.html plus registration-specific styles */
+        
+        .form-section {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 30px;
+        }
+
+        .form-section h3 {
+            font-size: 20px;
+            color: var(--text-dark);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .password-strength, .password-match {
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        .password-weak { color: #dc3545; }
+        .password-medium { color: #ffc107; }
+        .password-strong { color: #28a745; }
+
+        .password-match.match { color: #28a745; }
+        .password-match.no-match { color: #dc3545; }
+
+        .verification-notice {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            color: #28a745;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .verification-notice.warning {
+            background: rgba(255, 193, 7, 0.1);
+            border-color: rgba(255, 193, 7, 0.3);
+            color: #856404;
+        }
+
+        .role-comparison {
+            margin-top: 30px;
+        }
+
+        .role-option {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .role-option h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: var(--primary-green);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .auth-form-section {
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+        }
+    </style>
+
+    <!-- JavaScript -->
+    <script>
+        function togglePassword(fieldId) {
+            const passwordInput = document.getElementById(fieldId);
+            const eyeIcon = document.getElementById(fieldId + (fieldId === 'password' ? '-eye' : '-password-eye'));
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strengthDiv = document.getElementById('passwordStrength');
+            
+            if (password.length === 0) {
+                strengthDiv.textContent = '';
+                return;
+            }
+
+            let strength = 0;
+            const checks = [
+                password.length >= 8,
+                /[a-z]/.test(password),
+                /[A-Z]/.test(password),
+                /[0-9]/.test(password),
+                /[^A-Za-z0-9]/.test(password)
+            ];
+            
+            strength = checks.filter(Boolean).length;
+            
+            if (strength < 3) {
+                strengthDiv.textContent = 'Password strength: Weak';
+                strengthDiv.className = 'password-strength password-weak';
+            } else if (strength < 5) {
+                strengthDiv.textContent = 'Password strength: Medium';
+                strengthDiv.className = 'password-strength password-medium';
+            } else {
+                strengthDiv.textContent = 'Password strength: Strong';
+                strengthDiv.className = 'password-strength password-strong';
+            }
+        }
+
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const matchDiv = document.getElementById('passwordMatch');
+            
+            if (confirmPassword.length === 0) {
+                matchDiv.textContent = '';
+                return;
+            }
+
+            if (password === confirmPassword) {
+                matchDiv.textContent = 'Passwords match';
+                matchDiv.className = 'password-match match';
+            } else {
+                matchDiv.textContent = 'Passwords do not match';
+                matchDiv.className = 'password-match no-match';
+            }
+        }
+
+        // Form validation
+        document.getElementById('registrationForm')?.addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match.');
+                return;
+            }
+
+            if (password.length < 8) {
+                e.preventDefault();
+                alert('Password must be at least 8 characters long.');
+                return;
+            }
+
+            // Add loading state to submit button
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+            submitBtn.disabled = true;
+
+            // Re-enable after 10 seconds in case of network issues
+            setTimeout(function() {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 10000);
+        });
+
+        // Auto-hide flash messages
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function(message) {
+                setTimeout(function() {
+                    message.style.opacity = '0';
+                    setTimeout(function() {
+                        message.remove();
+                    }, 300);
+                }, 5000);
+            });
+        });
+
+        // Phone number formatting
+        document.getElementById('phone')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 6) {
+                value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+            } else if (value.length >= 3) {
+                value = value.replace(/(\d{3})(\d{0,3})/, '($1) $2');
+            }
+            e.target.value = value;
+        });
+
+        // Emergency contact phone formatting
+        document.getElementById('emergency_contact_phone')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 6) {
+                value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+            } else if (value.length >= 3) {
+                value = value.replace(/(\d{3})(\d{0,3})/, '($1) $2');
+            }
+            e.target.value = value;
+        });
+    </script>
+
+</body>
+</html>

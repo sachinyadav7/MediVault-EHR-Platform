@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if selected_role %}{{ selected_role.title() }} {% endif %}Login | MediVault</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="auth-body">
+
+    <!-- Header -->
+    <header class="auth-header">
+        <div class="container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}">
+                    <i class="fas fa-heartbeat"></i> MediVault
+                </a>
+            </div>
+            <nav>
+                <a href="{{ url_for('home') }}" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> Back to Home
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="auth-main">
+        <div class="auth-container">
+            <div class="auth-card">
+                <!-- Role Selection Header -->
+                <div class="auth-header-section">
+                    <div class="role-selector">
+                        <a href="{{ url_for('login', role='patient') }}" 
+                           class="role-tab {% if selected_role == 'patient' %}active{% endif %}">
+                            <i class="fas fa-user"></i>
+                            <span>Patient</span>
+                        </a>
+                        <a href="{{ url_for('login', role='doctor') }}" 
+                           class="role-tab {% if selected_role == 'doctor' %}active{% endif %}">
+                            <i class="fas fa-user-md"></i>
+                            <span>Doctor</span>
+                        </a>
+                        <a href="{{ url_for('login', role='admin') }}" 
+                           class="role-tab {% if selected_role == 'admin' %}active{% endif %}">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Admin</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Login Form -->
+                <div class="auth-form-section">
+                    <div class="auth-title">
+                        <h2>
+                            {% if selected_role == 'patient' %}
+                                <i class="fas fa-user"></i> Patient Login
+                            {% elif selected_role == 'doctor' %}
+                                <i class="fas fa-user-md"></i> Doctor Login
+                            {% elif selected_role == 'admin' %}
+                                <i class="fas fa-user-shield"></i> Admin Login
+                            {% else %}
+                                <i class="fas fa-sign-in-alt"></i> Select Your Role
+                            {% endif %}
+                        </h2>
+                        <p class="auth-subtitle">
+                            {% if selected_role == 'patient' %}
+                                Access your secure health records and manage appointments
+                            {% elif selected_role == 'doctor' %}
+                                Connect with patients and manage consultations
+                            {% elif selected_role == 'admin' %}
+                                System administration and user management
+                            {% else %}
+                                Please select your role above to continue
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="flash-messages">
+                                {% for category, message in messages %}
+                                    <div class="flash-message flash-{{ category }}">
+                                        <i class="fas fa-{% if category == 'error' %}exclamation-circle{% elif category == 'success' %}check-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+
+                    {% if selected_role %}
+                    <form method="POST" action="{{ url_for('login_post') }}" class="auth-form">
+                        <input type="hidden" name="role" value="{{ selected_role }}">
+                        
+                        <div class="form-group">
+                            <label for="email">
+                                <i class="fas fa-envelope"></i> Email Address
+                            </label>
+                            <input type="email" id="email" name="email" required 
+                                   placeholder="Enter your email address"
+                                   class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">
+                                <i class="fas fa-lock"></i> Password
+                            </label>
+                            <div class="password-input">
+                                <input type="password" id="password" name="password" required 
+                                       placeholder="Enter your password"
+                                       class="form-control">
+                                <button type="button" class="password-toggle" onclick="togglePassword()">
+                                    <i class="fas fa-eye" id="password-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="remember_me">
+                                <span class="checkmark"></span>
+                                Remember me
+                            </label>
+                            <a href="#" class="forgot-password">Forgot Password?</a>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="fas fa-sign-in-alt"></i> 
+                            Sign In as {{ selected_role.title() }}
+                        </button>
+                    </form>
+
+                    <div class="auth-divider">
+                        <span>Don't have an account?</span>
+                    </div>
+
+                    {% if selected_role in ['patient', 'doctor'] %}
+                    <a href="{{ url_for('register', role=selected_role) }}" class="btn btn-secondary btn-full">
+                        <i class="fas fa-user-plus"></i> 
+                        Create {{ selected_role.title() }} Account
+                    </a>
+                    {% endif %}
+
+                    {% else %}
+                    <div class="role-selection-prompt">
+                        <i class="fas fa-arrow-up"></i>
+                        <p>Please select your role above to access the login form</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Side Panel with Role Information -->
+            <div class="auth-side-panel">
+                {% if selected_role == 'patient' %}
+                <div class="side-panel-content">
+                    <h3><i class="fas fa-user"></i> For Patients</h3>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-shield-alt"></i> Secure health record storage</li>
+                        <li><i class="fas fa-video"></i> Video consultations with doctors</li>
+                        <li><i class="fas fa-calendar-check"></i> Easy appointment scheduling</li>
+                        <li><i class="fas fa-prescription-bottle"></i> Digital prescription management</li>
+                        <li><i class="fas fa-share-alt"></i> Controlled file sharing with doctors</li>
+                    </ul>
+                </div>
+                {% elif selected_role == 'doctor' %}
+                <div class="side-panel-content">
+                    <h3><i class="fas fa-user-md"></i> For Doctors</h3>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-users"></i> Patient management dashboard</li>
+                        <li><i class="fas fa-file-medical"></i> Access to shared patient files</li>
+                        <li><i class="fas fa-video"></i> Telemedicine consultations</li>
+                        <li><i class="fas fa-prescription"></i> Digital prescription writing</li>
+                        <li><i class="fas fa-chart-bar"></i> Patient health analytics</li>
+                    </ul>
+                </div>
+                {% elif selected_role == 'admin' %}
+                <div class="side-panel-content">
+                    <h3><i class="fas fa-user-shield"></i> For Administrators</h3>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-users-cog"></i> User management system</li>
+                        <li><i class="fas fa-user-check"></i> Doctor verification process</li>
+                        <li><i class="fas fa-audit"></i> Comprehensive audit logs</li>
+                        <li><i class="fas fa-shield-virus"></i> Security monitoring</li>
+                        <li><i class="fas fa-cogs"></i> System configuration</li>
+                    </ul>
+                </div>
+                {% else %}
+                <div class="side-panel-content">
+                    <h3><i class="fas fa-heartbeat"></i> MediVault</h3>
+                    <p>Your secure healthcare companion</p>
+                    <div class="security-badges">
+                        <div class="badge">
+                            <i class="fas fa-lock"></i>
+                            <span>AES-256 Encrypted</span>
+                        </div>
+                        <div class="badge">
+                            <i class="fas fa-certificate"></i>
+                            <span>HIPAA Compliant</span>
+                        </div>
+                        <div class="badge">
+                            <i class="fas fa-shield-check"></i>
+                            <span>SOC 2 Certified</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Enhanced Styles -->
+    <style>
+        .auth-body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .auth-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
+        }
+
+        .auth-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .auth-header .logo a {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .auth-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            padding: 40px 0;
+        }
+
+        .auth-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            width: 100%;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .auth-header-section {
+            background: var(--background-light);
+            padding: 0;
+        }
+
+        .role-selector {
+            display: flex;
+        }
+
+        .role-tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-light);
+            background: var(--background-light);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .role-tab:hover {
+            background: white;
+            color: var(--primary-green);
+        }
+
+        .role-tab.active {
+            background: white;
+            color: var(--primary-green);
+            border-bottom-color: var(--primary-green);
+        }
+
+        .role-tab i {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .role-tab span {
+            font-weight: 600;
+        }
+
+        .auth-form-section {
+            padding: 40px;
+        }
+
+        .auth-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .auth-title h2 {
+            font-size: 28px;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        .auth-subtitle {
+            color: var(--text-light);
+            font-size: 16px;
+        }
+
+        .auth-form .form-group {
+            margin-bottom: 25px;
+        }
+
+        .auth-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+
+        .password-input {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 0 !important;
+        }
+
+        .checkbox-label input {
+            margin-right: 10px;
+        }
+
+        .forgot-password {
+            color: var(--primary-green);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn-full {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .auth-divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .auth-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border-light);
+        }
+
+        .auth-divider span {
+            background: white;
+            padding: 0 20px;
+            color: var(--text-light);
+            position: relative;
+        }
+
+        .role-selection-prompt {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .role-selection-prompt i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--primary-green);
+        }
+
+        .auth-side-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            color: white;
+        }
+
+        .side-panel-content h3 {
+            font-size: 24px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .feature-list i {
+            color: var(--primary-green);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .security-badges {
+            margin-top: 40px;
+        }
+
+        .badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .badge i {
+            color: var(--primary-green);
+            font-size: 20px;
+        }
+
+        .flash-messages {
+            margin-bottom: 30px;
+        }
+
+        .flash-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .flash-error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .flash-success {
+            background: #efe;
+            color: #363;
+            border: 1px solid #cfc;
+        }
+
+        .flash-warning {
+            background: #ffeaa7;
+            color: #8b6914;
+            border: 1px solid #f1c40f;
+        }
+
+        .flash-info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #2196f3;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .auth-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .auth-form-section {
+                padding: 30px 20px;
+            }
+
+            .role-tab {
+                padding: 15px 10px;
+            }
+
+            .role-tab i {
+                font-size: 20px;
+            }
+
+            .auth-side-panel {
+                padding: 30px 20px;
+            }
+
+            .form-options {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .role-tab span {
+                font-size: 14px;
+            }
+
+            .auth-title h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+
+    <!-- JavaScript -->
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const passwordEye = document.getElementById('password-eye');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordEye.classList.remove('fa-eye');
+                passwordEye.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                passwordEye.classList.remove('fa-eye-slash');
+                passwordEye.classList.add('fa-eye');
+            }
+        }
+
+        // Auto-hide flash messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function(message) {
+                setTimeout(function() {
+                    message.style.opacity = '0';
+                    setTimeout(function() {
+                        message.remove();
+                    }, 300);
+                }, 5000);
+            });
+        });
+
+        // Form validation
+        document.querySelector('.auth-form')?.addEventListener('submit', function(e) {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                e.preventDefault();
+                alert('Please enter a valid email address.');
+                return;
+            }
+        });
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Add loading state to submit button
+        document.querySelector('.auth-form')?.addEventListener('submit', function() {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+            submitBtn.disabled = true;
+
+            // Re-enable after 5 seconds in case of network issues
+            setTimeout(function() {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 5000);
+        });
+    </script>
+
+</body>
+</html>

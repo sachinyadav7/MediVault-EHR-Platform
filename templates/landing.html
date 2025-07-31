@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediVault | Your Secure Health Partner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i> MediVault
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-btn">
+                        <i class="fas fa-sign-in-alt"></i> Login <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="{{ url_for('login', role='patient') }}">
+                            <i class="fas fa-user"></i> Patient Login
+                        </a>
+                        <a href="{{ url_for('login', role='doctor') }}">
+                            <i class="fas fa-user-md"></i> Doctor Login
+                        </a>
+                        <a href="{{ url_for('login', role='admin') }}">
+                            <i class="fas fa-user-shield"></i> Admin Login
+                        </a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-btn">
+                        <i class="fas fa-user-plus"></i> Register <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="{{ url_for('register', role='patient') }}">
+                            <i class="fas fa-user"></i> Patient Registration
+                        </a>
+                        <a href="{{ url_for('register', role='doctor') }}">
+                            <i class="fas fa-user-md"></i> Doctor Registration
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Your Health, Our Priority.</h1>
+                <p>Secure, encrypted digital health records accessible anytime, anywhere. Connect with certified doctors, manage appointments, and keep your medical history safe.</p>
+                <div class="hero-buttons">
+                    <a href="{{ url_for('register', role='patient') }}" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Get Started as Patient
+                    </a>
+                    <a href="{{ url_for('register', role='doctor') }}" class="btn btn-secondary">
+                        <i class="fas fa-stethoscope"></i> Join as Doctor
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="number">10,000+</span>
+                        <span class="label">Patients Trust Us</span>
+                    </div>
+                    <div class="stat">
+                        <span class="number">500+</span>
+                        <span class="label">Verified Doctors</span>
+                    </div>
+                    <div class="stat">
+                        <span class="number">100%</span>
+                        <span class="label">Secure & Encrypted</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Healthcare Technology">
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+        <div class="container">
+            <h2>Complete Healthcare Solutions</h2>
+            <div class="service-cards">
+                <div class="card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Secure Health Records</h3>
+                    <p>Military-grade AES-256 encryption ensures your medical data remains completely private and secure.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-video"></i>
+                    <h3>Video Consultations</h3>
+                    <p>Connect with certified doctors through secure video calls from the comfort of your home.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-calendar-check"></i>
+                    <h3>Smart Scheduling</h3>
+                    <p>Book appointments easily with real-time availability and automated reminders.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-prescription-bottle-alt"></i>
+                    <h3>Digital Prescriptions</h3>
+                    <p>Receive and manage digital prescriptions with medication reminders and refill alerts.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Health Analytics</h3>
+                    <p>Track your health metrics and get insights into your wellness journey over time.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-ambulance"></i>
+                    <h3>Emergency Access</h3>
+                    <p>Quick access to critical medical information during emergencies with secure QR codes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <div class="features-content">
+                <div class="feature-text">
+                    <h2>Why Choose MediVault?</h2>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <i class="fas fa-lock"></i>
+                            <div>
+                                <h4>HIPAA Compliant</h4>
+                                <p>Full compliance with healthcare privacy regulations and audit trails.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-users-cog"></i>
+                            <div>
+                                <h4>Role-Based Access</h4>
+                                <p>Granular permissions ensure only authorized personnel access sensitive data.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <div>
+                                <h4>Cloud Storage</h4>
+                                <p>Secure cloud infrastructure with 99.9% uptime and automatic backups.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-mobile-alt"></i>
+                            <div>
+                                <h4>Mobile Ready</h4>
+                                <p>Access your health records on any device, anywhere, anytime.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-image">
+                    <img src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Healthcare Technology">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Secure Your Health Data?</h2>
+            <p>Join thousands of patients and hundreds of doctors who trust MediVault with their healthcare needs.</p>
+            <div class="cta-buttons">
+                <a href="{{ url_for('register', role='patient') }}" class="btn btn-primary btn-large">
+                    <i class="fas fa-user-plus"></i> Start as Patient
+                </a>
+                <a href="{{ url_for('register', role='doctor') }}" class="btn btn-secondary btn-large">
+                    <i class="fas fa-stethoscope"></i> Join as Doctor
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h3><i class="fas fa-heartbeat"></i> MediVault</h3>
+                    <p>Securing healthcare data with cutting-edge encryption and user-friendly design.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>For Patients</h3>
+                    <ul>
+                        <li><a href="{{ url_for('register', role='patient') }}">Patient Registration</a></li>
+                        <li><a href="{{ url_for('login', role='patient') }}">Patient Login</a></li>
+                        <li><a href="#">Find Doctors</a></li>
+                        <li><a href="#">Book Appointment</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>For Healthcare Providers</h3>
+                    <ul>
+                        <li><a href="{{ url_for('register', role='doctor') }}">Doctor Registration</a></li>
+                        <li><a href="{{ url_for('login', role='doctor') }}">Doctor Login</a></li>
+                        <li><a href="#">Verification Process</a></li>
+                        <li><a href="#">Support Center</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 MediVault. All rights reserved. | HIPAA Compliant | AES-256 Encrypted</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Enhanced CSS Styles -->
+    <style>
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .dropdown-btn {
+            border: none !important;
+            cursor: pointer;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1000;
+            border-radius: 8px;
+            overflow: hidden;
+            top: 100%;
+            margin-top: 5px;
+        }
+
+        .dropdown-content a {
+            color: var(--text-dark) !important;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--background-light);
+            color: var(--primary-green) !important;
+        }
+
+        .dropdown-content a i {
+            margin-right: 8px;
+            width: 16px;
+            color: var(--primary-green);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Hero Stats */
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat .number {
+            display: block;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .stat .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 80px 0;
+            background: var(--background-light);
+        }
+
+        .features-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .feature-list {
+            margin-top: 30px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+
+        .feature-item i {
+            font-size: 24px;
+            color: var(--primary-green);
+            margin-right: 20px;
+            margin-top: 5px;
+            min-width: 24px;
+        }
+
+        .feature-item h4 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .feature-item p {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary-green) 0%, #258d3e 100%);
+            color: white;
+            text-align: center;
+            padding: 80px 0;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .btn-large {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+        }
+
+        /* Footer Bottom */
+        .footer-bottom {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #555;
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-stats {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .features-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .dropdown-content {
+                left: 0;
+                right: auto;
+            }
+        }
+    </style>
+
+    <!-- JavaScript for Enhanced Interactions -->
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add scroll effect to header
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(255, 255, 255, 0.95)';
+                header.style.backdropFilter = 'blur(10px)';
+            } else {
+                header.style.background = 'var(--white)';
+                header.style.backdropFilter = 'none';
+            }
+        });
+    </script>
+
+</body>
+</html>

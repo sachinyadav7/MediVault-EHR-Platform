@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediVault | Your Health Partner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="logo">MediVault</div>
+            <nav>
+                <ul>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#doctors">Find Doctors</a></li>
+                    <li><a href="#consultation">Consult Online</a></li>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('dashboard') }}">My Dashboard</a></li>
+                        {% if current_user.role == 'doctor' %}
+                            <li><a href="{{ url_for('shared_files') }}">Shared Files</a></li>
+                            <li><a href="{{ url_for('view_feedback') }}">Patient Feedback</a></li>
+                        {% elif current_user.role == 'patient' %}
+                            <li><a href="{{ url_for('patient_doctor_files') }}">Doctor Files</a></li>
+                            <li><a href="{{ url_for('my_feedback') }}">My Feedback</a></li>
+                        {% elif current_user.role == 'admin' %}
+                            <li><a href="{{ url_for('audit_logs') }}">Audit Logs</a></li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                {% if current_user.is_authenticated %}
+                    <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('logout') }}'">Logout</button>
+                {% else %}
+                    <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('login') }}'">Login</button>
+                    <button class="btn btn-primary" onclick="window.location.href='{{ url_for('register') }}'">Sign Up</button>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Your Health, Our Priority.</h1>
+                <p>Connect with top doctors, book appointments, and manage your health seamlessly with MediVault.</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary">Book an Appointment</button>
+                    <button class="btn btn-secondary">Video Consultation</button>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://via.placeholder.com/500x400?text=Healthcare+Image" alt="Healthcare Professionals">
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+        <div class="container">
+            <h2>Our Services</h2>
+            <div class="service-cards">
+                <div class="card">
+                    <i class="fas fa-user-md"></i>
+                    <h3>Find Doctors</h3>
+                    <p>Search for specialists near you and read patient reviews.</p>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-small">Explore</a> {# Placeholder #}
+                </div>
+                <div class="card">
+                    <i class="fas fa-video"></i>
+                    <h3>Online Consultations</h3>
+                    <p>Connect with doctors via video call from anywhere.</p>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-small">Consult Now</a> {# Placeholder #}
+                </div>
+                <div class="card">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h3>Book Appointments</h3>
+                    <p>Schedule in-clinic or online appointments with ease.</p>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-small">Book Now</a> {# Placeholder #}
+                </div>
+                <div class="card">
+                    <i class="fas fa-prescription-bottle-alt"></i>
+                    <h3>Order Medicines</h3>
+                    <p>Get your prescriptions delivered right to your doorstep.</p>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-small">Order Now</a> {# Placeholder #}
+                </div>
+            </div>
+        </div>
+    </section>
+
+        <!-- Dynamic Dashboard Content based on User Role -->
+    {% if current_user.is_authenticated %}
+    <section id="dashboard-content" class="dashboard-section">
+        <div class="container">
+            <h2>Welcome, {{ current_user.username }}! ({{ current_user.role | capitalize }})</h2>
+
+            {% if current_user.role == 'patient' %}
+                <h3>Your Medical Files</h3>
+                <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data" class="upload-form">
+                    <label for="file-upload" class="custom-file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose File
+                    </label>
+                    <input id="file-upload" type="file" name="file" required>
+                    <span id="file-name-display">No file chosen</span>
+                    <button type="submit" class="btn btn-primary">Upload File</button>
+                </form>
+
+                {% if files %}
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>File Name</th>
+                                <th>Upload Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for file in files %}
+                            <tr>
+                                <td>{{ file.file_name }}</td>
+                                <td>{{ file.upload_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <a href="{{ url_for('download', file_id=file.id) }}" class="btn btn-small btn-secondary">Download</a>
+                                    <a href="{{ url_for('share_file', file_id=file.id) }}" class="btn btn-small btn-primary">Share</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="no-content-message">No medical files uploaded yet. Start by uploading your first file!</p>
+                {% endif %}
+
+            {% elif current_user.role == 'doctor' %}
+                <h3>Doctor Dashboard</h3>
+                <p class="no-content-message">As a doctor, you can view files <a href="{{ url_for('shared_files') }}">shared with you</a> or provide <a href="{{ url_for('view_feedback') }}">feedback to patients</a>.</p>
+                <!-- Doctors might also see a list of their patients here to upload files for them -->
+                {# Example: List of patients to upload for #}
+                {# <h4>Your Patients (for direct upload)</h4> #}
+                {# {% if patients %} #}
+                {#     <ul> #}
+                {#         {% for patient in patients %} #}
+                {#             <li>{{ patient.username }} - <a href="{{ url_for('doctor_upload', patient_id=patient.id) }}">Upload File</a></li> #}
+                {#         {% endfor %} #}
+                {#     </ul> #}
+                {# {% else %} #}
+                {#     <p>No patients linked to your account yet.</p> #}
+                {# {% endif %} #}
+
+            {% elif current_user.role == 'admin' %}
+                <h3>Admin Dashboard</h3>
+                <p class="no-content-message">As an admin, you can view <a href="{{ url_for('audit_logs') }}">system audit logs</a>.</p>
+
+            {% endif %}
+
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Toast Message -->
+    <div id="toast" class="toast">
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- Toast Script -->
+    <script>
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById("toast");
+            const messageSpan = document.getElementById("toast-message");
+            toast.style.display = "block";
+            toast.style.backgroundColor = isSuccess ? "#4CAF50" : "#f44336";
+            messageSpan.textContent = message;
+            setTimeout(() => {
+                toast.style.display = "none";
+            }, 3000);
+        }
+        // Display Flask flash messages as toasts on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        // Map Flask categories to toast types
+                        const isSuccess = (['success', 'info']).includes('{{ category }}');
+                        showToast("{{ message }}", isSuccess);
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            // Update file name display for upload form
+            const fileUploadInput = document.getElementById('file-upload');
+            const fileNameDisplay = document.getElementById('file-name-display');
+            if (fileUploadInput && fileNameDisplay) {
+                fileUploadInput.addEventListener('change', function() {
+                    if (this.files && this.files.length > 0) {
+                        fileNameDisplay.textContent = this.files[0].name;
+                    } else {
+                        fileNameDisplay.textContent = "No file chosen";
+                    }
+                });
+            }
+        });  
+        // Example usage (hook this up after upload response)
+        // showToast("File uploaded successfully!");
+        // showToast("File upload failed!", false);
+    </script>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h3>MediVault</h3>
+                    <p>&copy; 2025 MediVault. All rights reserved.</p>
+                </div>
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Connect With Us</h3>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
